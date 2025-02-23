@@ -106,21 +106,20 @@ export const useFormBuilder = (formId?: string) => {
   }, []);
 
   const previewForm = () => {
-    navigate(`/form/${formConfig.id}`);
+    const currentUrl = window.location.href;
+    const urlWithoutEdit = currentUrl.replace('/edit', '');
+    window.open(urlWithoutEdit, '_blank');
   };
 
   // Throttled Save Function
-  const saveForm = useCallback(
-    () => {
-      const updatedConfig = {
-        ...formConfig,
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
-      setLastSaved(new Date());
-    },
-    [formConfig],
-  );
+  const saveForm = useCallback(() => {
+    const updatedConfig = {
+      ...formConfig,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
+    setLastSaved(new Date());
+  }, [formConfig]);
 
   return {
     formConfig,
