@@ -1,6 +1,6 @@
 # Getting Started with Create React App
 
-Link for build - https://spiffy-marshmallow-7dd799.netlify.app
+Link for build - https://enchanting-brioche-254400.netlify.app/new
 
 # Features Including - 
 1) Auto Save feature implemented
