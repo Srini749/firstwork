@@ -80,7 +80,7 @@ export const validatorsForFormCreation: Record<QuestionType, ValidatorFunctionFo
   'single-select': (question) =>
     question.title === ''
       ? 'This field is required'
-      : !question.options || (question.options && question.options.length < 2)
+      : !question.options || (question.options && question.options.length <= 2)
       ? 'Please add atleast 2 options'
       : null,
 

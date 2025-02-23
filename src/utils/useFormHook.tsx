@@ -141,7 +141,6 @@ export const useFormBuilder = (formId?: string) => {
     }, {} as { [key: string]: string | null });
     setSaving(false);
     const hasError = Object.values(updatedErrors).some(value => value !== null && value !== undefined);
-    console.log(updatedErrors,formConfig, hasError, '-------');
     if (hasError) {
       setErrors(updatedErrors);
       return;
