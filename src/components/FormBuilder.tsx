@@ -35,9 +35,11 @@ export const FormBuilder: React.FC = () => {
           <button onClick={saveForm} className='save-form bg-blue-500 text-white px-4 py-2 rounded'>
             Save Form
           </button>
-          <button onClick={previewForm} className='bg-blue-500 text-white px-4 py-2 rounded'>
-            Preview
-          </button>
+          {formConfig.questions.length > 0 && (
+            <button onClick={previewForm} className='bg-blue-500 text-white px-4 py-2 rounded'>
+              Preview
+            </button>
+          )}
         </div>
       </div>
 
