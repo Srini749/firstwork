@@ -107,5 +107,14 @@
   color: red;
   font-size: 12px;
   text-align: left;
-  margin-top: 4px;
+  margin-top: -24px;
 }
+
+.submitted-button {
+  background-color: grey;
+}
+
+.submitted-button:hover {
+  background-color: grey;
+}
+

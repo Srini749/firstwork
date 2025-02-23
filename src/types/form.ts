@@ -31,6 +31,7 @@ export interface FormConfig {
   questions: Question[];
   createdAt: string;
   updatedAt: string;
+  isSubmitted?: boolean,
 }
 export interface FormAnswers {
   [key: string]: string | string[];
