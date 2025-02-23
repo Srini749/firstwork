@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './styles/textfieldStyles.css';
 
 interface TextFieldProps {
@@ -9,10 +9,19 @@ interface TextFieldProps {
   type?: string;
   required?: boolean;
   onFocus: () => void;
-  error: string,
+  error: string;
 }
 
-const TextField: React.FC<TextFieldProps> = ({ id, value, onChange, onFocus, label, type = 'text', required = false, error }) => {
+const TextField: React.FC<TextFieldProps> = ({
+  id,
+  value,
+  onChange,
+  onFocus,
+  label,
+  type = 'text',
+  required = false,
+  error,
+}) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     onChange(e.target.value);
   };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Question as QuestionType } from '../types/form';
 import './styles/styles.css';
 import TextField from './TextField';
@@ -10,20 +10,24 @@ interface QuestionProps {
   question: QuestionType;
   onUpdate: (id: string, updates: Partial<QuestionType>) => void;
   onDelete: (id: string) => void;
-  onAnswerChange: (id: string, answer: string) => void;
-  answer: string;
 }
 
 export const Question: React.FC<QuestionProps> = ({ question, onUpdate, onDelete }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const {
+    type: questionType,
+    id: questionId,
+    questionInput: { value: questionInputValue = '', error: questionInputError = '' } = {},
+    answerInput: { value: answerInputValue = '', error: answerInputError = '' } = {},
+  } = question;
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value;
-    onUpdate(question.id, { type, options: undefined, answerInput: { value: '', error: '' } });
+    onUpdate(questionId, { type, options: undefined, answerInput: { value: '', error: '' } });
   };
 
   const handleTitleChange = (newTitle: string) => {
-    onUpdate(question.id, {
+    onUpdate(questionId, {
       title: newTitle,
       questionInput: {
         value: newTitle,
@@ -33,7 +37,7 @@ export const Question: React.FC<QuestionProps> = ({ question, onUpdate, onDelete
   };
 
   const handleAnswerChange = (newTitle: string) => {
-    onUpdate(question.id, {
+    onUpdate(questionId, {
       answerInput: {
         value: newTitle,
         error: '',
@@ -45,19 +49,23 @@ export const Question: React.FC<QuestionProps> = ({ question, onUpdate, onDelete
     setShowOptions(true);
   };
 
+  const onDeleteQuestion = useCallback(() => {
+    onDelete(questionId);
+  }, [questionId]);
+
   return (
     <div className='question'>
       <div className='question-header'>
         <TextField
-          id={`question-${question.id}`}
-          value={question.title}
+          id={`question-${questionId}`}
+          value={questionInputValue}
           onChange={handleTitleChange}
           label='Question title *'
           onFocus={handleTitleFocus}
-          error={question.questionInput.error}
+          error={questionInputError}
         />
         <div className='question-controls'>
-          <button onClick={() => onDelete(question.id)} className='control-button'>
+          <button onClick={onDeleteQuestion} className='control-button'>
             <i className='fa fa-trash-o trash-icon'></i>
           </button>
         </div>
@@ -66,7 +74,7 @@ export const Question: React.FC<QuestionProps> = ({ question, onUpdate, onDelete
       {showOptions && (
         <>
           <div className='input-container'>
-            <select value={question.type} onChange={handleTypeChange} className='text-field question-type'>
+            <select value={questionType} onChange={handleTypeChange} className='text-field question-type'>
               <option value='short-text'>Short Text</option>
               <option value='long-text'>Long Text</option>
               <option value='number'>Number</option>
@@ -77,13 +85,13 @@ export const Question: React.FC<QuestionProps> = ({ question, onUpdate, onDelete
             <label className='placeholder-label'>Type *</label>
           </div>
           <TextField
-            id={`answer-${question.id}`}
-            value={question.answerInput.value}
+            id={`answer-${questionId}`}
+            value={answerInputValue}
             onChange={handleAnswerChange}
             label='Answer *'
-            type={question.type}
+            type={questionType}
             onFocus={() => {}}
-            error={question.answerInput.error}
+            error={answerInputError}
           />
         </>
       )}

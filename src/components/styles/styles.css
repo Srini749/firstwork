@@ -174,14 +174,15 @@ body {
   color: #000;
 }
 
-.chevron {
-  font-size: 14px !important;
-  color: #000 !important;
-}
-
 .question-controls {
   display: flex;
   flex-direction: row;
   margin-bottom: 14px;
   margin-left: 12px;
+}
+
+.add-question, .submit-button {
+  position: sticky;
+  bottom: 20px; /* Adjust according to the desired spacing */
+  width: 100%;
 }
