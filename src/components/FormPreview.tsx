@@ -75,7 +75,7 @@
             return <TextInputQuestion key={question.id} {...commonProps} />;
         }
       },
-      [answers, errors, handleAnswer  Change],
+      [answers, errors, handleAnswerChange],
     );
 
     const memoizedQuestions = useMemo(
