@@ -84,5 +84,5 @@ export const validatorsForFormCreation: Record<QuestionType, ValidatorFunctionFo
       ? 'Please add atleast 2 options'
       : null,
 
-  date: (question) => (question.title !== '' ? 'Title field is required' : null),
+  date: (question) => (question.title === '' ? 'Title field is required' : null),
 };
