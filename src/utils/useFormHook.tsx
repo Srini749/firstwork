@@ -30,9 +30,9 @@ const useFormConfig = () => {
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       setIsSaving(true);
-      localStorage.setItem('formConfig', JSON.stringify(formConfig));
-      setTimeout(() => setIsSaving(false), 2000);
-    }, 10000);
+      validateFormAndSave();
+      setTimeout(() => setIsSaving(false), 4000);
+    }, 15000);
 
     return () => clearInterval(autoSaveInterval);
   }, [formConfig]);
@@ -77,7 +77,10 @@ const useFormConfig = () => {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    validateFormAndSave();
+  };
 
+  const validateFormAndSave = () => {
     const updatedFormConfig = { ...formConfig };
 
     updatedFormConfig.questions.forEach((question) => {
@@ -96,12 +99,11 @@ const useFormConfig = () => {
       (q) => q.questionInput.error !== '' || q.answerInput.error !== '',
     );
 
-    if (!hasErrors) {
-      alert('Form saved successfully!');
+    if (hasErrors) {
+      setFormConfig(updatedFormConfig);
+      return;
     }
-
     localStorage.setItem('formConfig', JSON.stringify(updatedFormConfig));
-    setFormConfig(updatedFormConfig);
   };
 
   return {
