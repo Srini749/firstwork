@@ -73,14 +73,14 @@ export const validatorsForFormCreation: Record<QuestionType, ValidatorFunctionFo
   'multiple-choice': (question) =>
     question.title === ''
       ? 'Title field is required'
-      : question.options && question.options.length < 2
+      : !question.options || (question.options && question.options.length < 2)
       ? 'Please add atleast 2 options'
       : null,
 
   'single-select': (question) =>
     question.title === ''
       ? 'This field is required'
-      : question.options && question.options.length < 2
+      : !question.options || (question.options && question.options.length < 2)
       ? 'Please add atleast 2 options'
       : null,
 
