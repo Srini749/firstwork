@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormBuilder } from '../utils/useFormHook';
 import { Question } from './Question';
 import { useParams } from 'react-router-dom';
+import './styles/styles.css';
 
 export const FormBuilder: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
@@ -31,7 +32,7 @@ export const FormBuilder: React.FC = () => {
           <p className='text-sm text-gray-500'>
             {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved yet'}
           </p>
-          <button onClick={saveForm} className='bg-blue-500 text-white px-4 py-2 rounded'>
+          <button onClick={saveForm} className='save-form bg-blue-500 text-white px-4 py-2 rounded'>
             Save Form
           </button>
           <button onClick={previewForm} className='bg-blue-500 text-white px-4 py-2 rounded'>

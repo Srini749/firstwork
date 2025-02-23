@@ -81,3 +81,11 @@
 .preview-mode {
   @apply bg-green-100 text-green-800;
 }
+
+.save-form {
+  margin-right: 12px !important;
+}
+
+.text-sm {
+  margin-bottom: 2px;
+}
