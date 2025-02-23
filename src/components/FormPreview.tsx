@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormAnswers, FormConfig, Question } from '../types/form';
 import { validatorsForFormSubmission } from '../utils/validations';
@@ -10,6 +10,12 @@ export const FormPreview: React.FC = () => {
     const saved = localStorage.getItem(`${formId}`);
     return saved ? JSON.parse(saved).answers || [] : [];
   });
+
+  useEffect(() => {
+    if (formConfig.isSubmitted) {
+      alert('Form has been submitted');
+    }
+  }, [])
 
   const [formConfig, setFormConfig] = useState<FormConfig>(() => {
     const saved = localStorage.getItem(`${formId}`);
@@ -43,6 +49,7 @@ export const FormPreview: React.FC = () => {
       if (Object.values(updatedErrors).every((error) => !error)) {
         updatedFormData.isSubmitted = true;
         localStorage.setItem(`${formId}`, JSON.stringify(updatedFormData));
+        alert('Form has been submitted');
       }
       setFormConfig(updatedFormData);
     },
