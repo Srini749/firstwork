@@ -1,30 +1,65 @@
 import React from 'react';
+import { useFormBuilder } from '../utils/useFormHook';
 import { Question } from './Question';
-import useFormConfig from '../utils/useFormHook';
+import { useParams } from 'react-router-dom';
 
 export const FormBuilder: React.FC = () => {
-  const { formConfig, isSaving, dots, addQuestion, updateQuestion, deleteQuestion, handleFormSubmit } = useFormConfig();
+  const { formId } = useParams<{ formId: string }>();
+  const {
+    formConfig,
+    addQuestion,
+    updateQuestion,
+    deleteQuestion,
+    addOption,
+    updateOption,
+    deleteOption,
+    saveForm,
+    previewForm,
+    lastSaved,
+  } = useFormBuilder(formId);
 
   return (
-    <form onSubmit={handleFormSubmit} className='form-builder'>
-      <div className='form-header'>
-        <h1>{formConfig.title}</h1>
+    <div className='max-w-4xl mx-auto p-6'>
+      <div className='flex justify-between items-center mb-6'>
+        <input
+          type='text'
+          value={formConfig.title}
+          onChange={(e) => updateQuestion('title', { title: e.target.value })}
+          className='text-2xl font-bold border-none focus:outline-none'
+        />
+        <div>
+          <p className='text-sm text-gray-500'>
+            {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved yet'}
+          </p>
+          <button onClick={saveForm} className='bg-blue-500 text-white px-4 py-2 rounded'>
+            Save Form
+          </button>
+          <button onClick={previewForm} className='bg-blue-500 text-white px-4 py-2 rounded'>
+            Preview
+          </button>
+        </div>
       </div>
 
-      <div className='questions-container'>
+      <div className='space-y-4'>
         {formConfig.questions.map((question) => (
-          <Question key={question.id} question={question} onUpdate={updateQuestion} onDelete={deleteQuestion} />
+          <Question
+            key={question.id}
+            question={question}
+            onUpdate={updateQuestion}
+            onDelete={deleteQuestion}
+            onAddOption={addOption}
+            onUpdateOption={updateOption}
+            onDeleteOption={deleteOption}
+          />
         ))}
       </div>
 
-      <button type='button' onClick={addQuestion} className='add-question'>
+      <button
+        onClick={addQuestion}
+        className='mt-4 w-full py-2 border-2 border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-gray-50'
+      >
         + Add Question
       </button>
-      <button type='submit' className='submit-button'>
-        {isSaving ? `Saving${dots}` : 'Save'}
-      </button>
-    </form>
+    </div>
   );
 };
-
-export default FormBuilder;

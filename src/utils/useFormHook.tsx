@@ -1,59 +1,36 @@
-import { useState, useEffect, useCallback } from 'react';
-import { FormConfig, Question as QuestionType } from '../types/form';
-import { validateField } from '../utils/validations';
+import { useState, useCallback, useEffect } from 'react';
+import { FormConfig, Question, QuestionType } from '../types/form';
+import { useNavigate } from 'react-router-dom';
 
-const useFormConfig = () => {
-  const loadFromLocalStorage = () => {
-    const savedFormConfig = localStorage.getItem('formConfig');
-    return savedFormConfig
-      ? JSON.parse(savedFormConfig)
-      : {
-          id: 'default-form',
-          title: 'My Form',
-          questions: [
-            {
-              id: `q-${Date.now()}`,
-              title: '',
-              type: 'short-text',
-              questionInput: { value: '', error: '' },
-              answerInput: { value: '', error: '' },
-            },
-          ],
-        };
-  };
+export const useFormBuilder = (formId?: string) => {
+  const navigate = useNavigate();
+  const [formConfig, setFormConfig] = useState<FormConfig>(() => {
+    const saved = localStorage.getItem(`form_${formId || 'draft'}`);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      id: formId || `form-${Date.now()}`,
+      title: 'Untitled Form',
+      questions: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  });
 
-  const [formConfig, setFormConfig] = useState<FormConfig>(loadFromLocalStorage());
-  const [isSaving, setIsSaving] = useState(false);
-  const [dots, setDots] = useState('.');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Auto-save logic
+  // Auto-save effect
   useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
-      setIsSaving(true);
-      validateFormAndSave();
-      setTimeout(() => setIsSaving(false), 4000);
-    }, 15000);
-
-    return () => clearInterval(autoSaveInterval);
+    saveForm();
   }, [formConfig]);
 
-  // Dots for saving animation
-  useEffect(() => {
-    if (isSaving) {
-      const dotInterval = setInterval(() => {
-        setDots((prevDots) => (prevDots.length < 3 ? prevDots + '.' : '.'));
-      }, 300);
-      return () => clearInterval(dotInterval);
-    }
-  }, [isSaving]);
-
   const addQuestion = useCallback(() => {
-    const newQuestion: QuestionType = {
+    const newQuestion: Question = {
       id: `q-${Date.now()}`,
       title: '',
       type: 'short-text',
-      questionInput: { value: '', error: '' },
-      answerInput: { value: '', error: '' },
+      required: false,
     };
     setFormConfig((prev) => ({
       ...prev,
@@ -61,7 +38,7 @@ const useFormConfig = () => {
     }));
   }, []);
 
-  const updateQuestion = useCallback((id: string, updates: Partial<QuestionType>) => {
+  const updateQuestion = useCallback((id: string, updates: Partial<Question>) => {
     setFormConfig((prev) => ({
       ...prev,
       questions: prev.questions.map((q) => (q.id === id ? { ...q, ...updates } : q)),
@@ -75,46 +52,79 @@ const useFormConfig = () => {
     }));
   }, []);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    validateFormAndSave();
-  };
-
-  const validateFormAndSave = () => {
-    const updatedFormConfig = { ...formConfig };
-
-    updatedFormConfig.questions.forEach((question) => {
-      const error = validateField(question.answerInput.value, question);
-
-      if (error) {
-        if (error.errorField === 'question') {
-          question.questionInput.error = error.value;
-        } else {
-          question.answerInput.error = error.value;
+  const addOption = useCallback((questionId: string) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      questions: prev.questions.map((q) => {
+        if (q.id === questionId) {
+          const options = q.options || [];
+          return {
+            ...q,
+            options: [...options, { id: `opt-${Date.now()}`, value: '' }],
+          };
         }
-      }
-    });
+        return q;
+      }),
+    }));
+  }, []);
 
-    const hasErrors = updatedFormConfig.questions.some(
-      (q) => q.questionInput.error !== '' || q.answerInput.error !== '',
-    );
+  const updateOption = useCallback((questionId: string, optionId: string, value: string) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      questions: prev.questions.map((q) => {
+        if (q.id === questionId && q.options) {
+          return {
+            ...q,
+            options: q.options.map((opt) => (opt.id === optionId ? { ...opt, value } : opt)),
+          };
+        }
+        return q;
+      }),
+    }));
+  }, []);
 
-    if (hasErrors) {
-      setFormConfig(updatedFormConfig);
-      return;
-    }
-    localStorage.setItem('formConfig', JSON.stringify(updatedFormConfig));
+  const deleteOption = useCallback((questionId: string, optionId: string) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      questions: prev.questions.map((q) => {
+        if (q.id === questionId && q.options) {
+          return {
+            ...q,
+            options: q.options.filter((opt) => opt.id !== optionId),
+          };
+        }
+        return q;
+      }),
+    }));
+  }, []);
+
+  const previewForm = () => {
+    navigate(`/form/${formConfig.id}`);
   };
+
+  // Throttled Save Function
+  const saveForm = useCallback(
+    () => {
+      const updatedConfig = {
+        ...formConfig,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(`form_${formConfig.id}`, JSON.stringify(updatedConfig));
+      setLastSaved(new Date());
+    },
+    [formConfig],
+  );
 
   return {
     formConfig,
-    isSaving,
-    dots,
     addQuestion,
     updateQuestion,
     deleteQuestion,
-    handleFormSubmit,
+    addOption,
+    updateOption,
+    deleteOption,
+    saveForm,
+    lastSaved,
+    previewForm,
   };
 };
-
-export default useFormConfig;
