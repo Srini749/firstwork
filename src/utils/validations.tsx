@@ -1,6 +1,7 @@
-import { Question, QuestionType } from "../types/form";
+import { Question, QuestionType } from '../types/form';
 
-type ValidatorFunction = (value: any, question: Question) => string | null;
+type ValidatorFunctionForSubmission = (value: any, question: Question) => string | null;
+type ValidatorFunctionForCreation = (question: Question) => string | null;
 
 const requiredValidator = (value: any, message: string) => (!value ? message : null);
 
@@ -28,7 +29,7 @@ const rangeValidator = (value: number, question: Question) => {
   return null;
 };
 
-export const validators: Record<QuestionType, ValidatorFunction> = {
+export const validatorsForFormSubmission: Record<QuestionType, ValidatorFunctionForSubmission> = {
   'short-text': (value, question) =>
     requiredValidator(value, 'This field is required') || lengthValidator(value, question),
 
@@ -49,12 +50,39 @@ export const validators: Record<QuestionType, ValidatorFunction> = {
   'multiple-choice': (value, question) =>
     requiredValidator(value?.length ? value : null, 'Please select at least one option'),
 
-  'single-select': (value, question) =>
-    requiredValidator(value, 'Please select an option'),
+  'single-select': (value, question) => requiredValidator(value, 'Please select an option'),
 
   date: (value, question) => {
     if (requiredValidator(value, 'This field is required')) return 'This field is required';
     const date = new Date(value);
     return isNaN(date.getTime()) ? 'Please enter a valid date' : null;
-  }
+  },
+};
+
+export const validatorsForFormCreation: Record<QuestionType, ValidatorFunctionForCreation> = {
+  'short-text': (question) => (question.title === '' ? 'Title field is required' : null),
+
+  'long-text': (question) => (question.title === '' ? 'Title field is required' : null),
+
+  email: (question) => (question.title === '' ? 'Title field is required' : null),
+
+  phone: (question) => (question.title === '' ? 'Title field is required' : null),
+
+  number: (question) => (question.title === '' ? 'Title field is required' : null),
+
+  'multiple-choice': (question) =>
+    question.title === ''
+      ? 'Title field is required'
+      : question.options && question.options.length < 2
+      ? 'Please add atleast 2 options'
+      : null,
+
+  'single-select': (question) =>
+    question.title === ''
+      ? 'This field is required'
+      : question.options && question.options.length < 2
+      ? 'Please add atleast 2 options'
+      : null,
+
+  date: (question) => (question.title !== '' ? 'Title field is required' : null),
 };

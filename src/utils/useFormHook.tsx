@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
-import { FormConfig, Question, QuestionType } from '../types/form';
+import { FormConfig, Question } from '../types/form';
 import { useNavigate } from 'react-router-dom';
+import { validatorsForFormCreation } from './validations';
 
 export const useFormBuilder = (formId?: string) => {
   const navigate = useNavigate();
+  const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
   const [formConfig, setFormConfig] = useState<FormConfig>(() => {
     const saved = localStorage.getItem(`${formId || 'draft'}`);
     if (saved) {
@@ -117,7 +119,10 @@ export const useFormBuilder = (formId?: string) => {
 
   const previewForm = () => {
     const currentUrl = window.location.href;
-    const urlWithoutEdit = currentUrl.replace('/edit', '');
+    let urlWithoutEdit = currentUrl.replace('/edit', '');
+    if (!currentUrl.includes(formConfig.id)) {
+      urlWithoutEdit = urlWithoutEdit.replace('/new', `/${formConfig.id}`)
+    }
     window.open(urlWithoutEdit, '_blank');
   };
 
@@ -126,9 +131,22 @@ export const useFormBuilder = (formId?: string) => {
       ...formConfig,
       updatedAt: new Date().toISOString(),
     };
-    localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
-    setLastSaved(new Date());
+    const updatedErrors = formConfig.questions.reduce((acc, question) => {
+      const validate = validatorsForFormCreation[question.type];
+      if (validate) {
+        const error = validate(question);
+        acc[question.id] = error || null;
+      }
+      return acc;
+    }, {} as { [key: string]: string | null });
     setSaving(false);
+    const hasError = Object.values(updatedErrors).some(value => value !== null && value !== undefined);
+    if (hasError) {
+      setErrors(updatedErrors);
+      return;
+    }
+    setLastSaved(new Date());
+    localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
   }, [formConfig]);
 
   return {
@@ -144,5 +162,6 @@ export const useFormBuilder = (formId?: string) => {
     previewForm,
     updateFormTitle,
     saving,
+    errors,
   };
 };

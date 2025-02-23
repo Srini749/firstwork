@@ -19,6 +19,7 @@ export const FormBuilder: React.FC = () => {
     lastSaved,
     updateFormTitle,
     saving,
+    errors,
   } = useFormBuilder(formId);
 
   return (
@@ -59,6 +60,7 @@ export const FormBuilder: React.FC = () => {
             onAddOption={addOption}
             onUpdateOption={updateOption}
             onDeleteOption={deleteOption}
+            error={errors[question.id]}
           />
         ))}
       </div>

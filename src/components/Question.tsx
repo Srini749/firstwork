@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Question as QuestionType, QuestionType as QuestionTypes } from '../types/form';
 import './styles/styles.css';
 
@@ -9,7 +9,30 @@ interface QuestionProps {
   onAddOption: (questionId: string) => void;
   onUpdateOption: (questionId: string, optionId: string, value: string) => void;
   onDeleteOption: (questionId: string, optionId: string) => void;
+  error: string | null,
 }
+
+const questionTypes = [
+  { value: 'short-text', label: 'Short Text' },
+  { value: 'long-text', label: 'Long Text' },
+  { value: 'number', label: 'Number' },
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone' },
+  { value: 'date', label: 'Date' },
+  { value: 'multiple-choice', label: 'Multiple Choice' },
+  { value: 'single-select', label: 'Single Select' },
+];
+
+const validationFields: Record<QuestionTypes, string[]> = {
+  'short-text': ['minLength', 'maxLength'],
+  'long-text': ['minLength', 'maxLength'],
+  number: ['min', 'max'],
+  date: ['minDate', 'maxDate'],
+  email: [],
+  phone: [],
+  'multiple-choice': [],
+  'single-select': [],
+};
 
 export const Question: React.FC<QuestionProps> = ({
   question,
@@ -18,206 +41,134 @@ export const Question: React.FC<QuestionProps> = ({
   onAddOption,
   onUpdateOption,
   onDeleteOption,
+  error,
 }) => {
-  const questionTypes: { value: QuestionTypes; label: string }[] = [
-    { value: 'short-text', label: 'Short Text' },
-    { value: 'long-text', label: 'Long Text' },
-    { value: 'number', label: 'Number' },
-    { value: 'email', label: 'Email' },
-    { value: 'phone', label: 'Phone' },
-    { value: 'date', label: 'Date' },
-    { value: 'multiple-choice', label: 'Multiple Choice' },
-    { value: 'single-select', label: 'Single Select' },
-  ];
+  const renderValidationFields = useMemo(() => {
+    const fieldsToRender = validationFields[question.type];
+    if (!fieldsToRender) return null;
 
-  const renderValidationFields = () => {
-    switch (question.type) {
-      case 'short-text':
-      case 'long-text':
-        return (
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <label className="left-align block text-sm text-gray-600 mb-1">Min Length</label>
-              <input
-                type="number"
-                value={question.validation?.minLength || ''}
-                onChange={(e) => onUpdate(question.id, {
+    return (
+      <div className='grid grid-cols-2 gap-4 mt-2'>
+        {fieldsToRender.map((field) => (
+          <div key={field}>
+            <label className='left-align block text-sm text-gray-600 mb-1'>
+              {field.replace(/([A-Z])/g, ' $1').toUpperCase()} (Optional)
+            </label>
+            <input
+              type={field.includes('Date') ? 'date' : 'number'}
+              value={question.validation?.[field] || ''}
+              onChange={(e) => {
+                const value = field.includes('Date') ? e.target.value : parseFloat(e.target.value) || undefined;
+                onUpdate(question.id, {
                   validation: {
                     ...question.validation,
-                    minLength: parseInt(e.target.value) || undefined
-                  }
-                })}
-                className="w-full p-2 border rounded text-sm"
-                min="0"
-              />
-            </div>
-            <div>
-              <label className="left-align block text-sm text-gray-600 mb-1">Max Length</label>
-              <input
-                type="number"
-                value={question.validation?.maxLength || ''}
-                onChange={(e) => onUpdate(question.id, {
-                  validation: {
-                    ...question.validation,
-                    maxLength: parseInt(e.target.value) || undefined
-                  }
-                })}
-                className="w-full p-2 border rounded text-sm"
-                min="0"
-              />
-            </div>
+                    [field]: value,
+                  },
+                });
+              }}
+              className='w-full p-2 border rounded text-sm'
+            />
           </div>
-        );
+        ))}
+      </div>
+    );
+  }, [question.type, question.validation, question.id, onUpdate]);
 
-      case 'number':
-        return (
-          <div className="grid grid-cols-3 gap-4 mt-2">
-            <div>
-              <label className="left-align block text-sm text-gray-600 mb-1">Min Value</label>
-              <input
-                type="number"
-                value={question.validation?.min || ''}
-                onChange={(e) => onUpdate(question.id, {
-                  validation: {
-                    ...question.validation,
-                    min: parseFloat(e.target.value) || undefined
-                  }
-                })}
-                className="w-full p-2 border rounded text-sm"
-              />
-            </div>
-            <div>
-              <label className="left-align block text-sm text-gray-600 mb-1">Max Value</label>
-              <input
-                type="number"
-                value={question.validation?.max || ''}
-                onChange={(e) => onUpdate(question.id, {
-                  validation: {
-                    ...question.validation,
-                    max: parseFloat(e.target.value) || undefined
-                  }
-                })}
-                className="w-full p-2 border rounded text-sm"
-              />
-            </div>
-          </div>
-        );
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(question.id, { title: e.target.value });
+    },
+    [question.id, onUpdate],
+  );
 
-      case 'date':
-        return (
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <div>
-              <label className="left-align block text-sm text-gray-600 mb-1">Min Date</label>
-              <input
-                type="date"
-                value={question.validation?.minDate || ''}
-                onChange={(e) => onUpdate(question.id, {
-                  validation: {
-                    ...question.validation,
-                    minDate: e.target.value || undefined
-                  }
-                })}
-                className="w-full p-2 border rounded text-sm"
-              />
-            </div>
-            <div>
-              <label className="left-align block text-sm text-gray-600 mb-1">Max Date</label>
-              <input
-                type="date"
-                value={question.validation?.maxDate || ''}
-                onChange={(e) => onUpdate(question.id, {
-                  validation: {
-                    ...question.validation,
-                    maxDate: e.target.value || undefined
-                  }
-                })}
-                className="w-full p-2 border rounded text-sm"
-              />
-            </div>
-          </div>
-        );
+  const handleTypeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      onUpdate(question.id, {
+        type: e.target.value as QuestionTypes,
+        validation: {}, // Reset validation when type changes
+      });
+    },
+    [question.id, onUpdate],
+  );
 
-      default:
-        return null;
-    }
-  };
+  const handleRequiredChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(question.id, { required: e.target.checked });
+    },
+    [question.id, onUpdate],
+  );
+
+  const handleDelete = useCallback(() => {
+    onDelete(question.id);
+  }, [question.id, onUpdate]);
+
+  const handleHelperTextUpdate = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdate(question.id, { helperText: e.target.value });
+    },
+    [question.id, onUpdate],
+  );
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm">
-      <div className="flex justify-between gap-4 mb-4">
+    <div className='border rounded-lg p-4 bg-white shadow-sm'>
+      {error && <div className='question-error no-margin error-message'>X {error}</div>}
+      <div className='flex justify-between gap-4 mb-4'>
         <input
-          type="text"
+          type='text'
           value={question.title}
-          onChange={(e) => onUpdate(question.id, { title: e.target.value })}
-          placeholder="Question text"
-          className="flex-1 p-2 border rounded"
+          onChange={handleTitleChange}
+          placeholder='Question text'
+          className={`flex-1 p-2 border rounded`}
         />
-        <select
-          value={question.type}
-          onChange={(e) => onUpdate(question.id, { 
-            type: e.target.value as QuestionTypes,
-            validation: {} // Reset validation when type changes
-          })}
-          className="p-2 border rounded"
-        >
+        <select value={question.type} onChange={handleTypeChange} className='p-2 border rounded'>
           {questionTypes.map((type) => (
             <option key={type.value} value={type.value}>
               {type.label}
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={question.required}
-            onChange={(e) => onUpdate(question.id, { required: e.target.checked })}
-          />
+        <label className='flex items-center gap-2'>
+          <input type='checkbox' checked={question.required} onChange={handleRequiredChange} />
           Required
         </label>
-        <button
-          onClick={() => onDelete(question.id)}
-          className="text-red-500 hover:text-red-700"
-        >
+        <button onClick={handleDelete} className='text-red-500 hover:text-red-700'>
           Delete
         </button>
       </div>
 
-      <div className="mt-2">
-        <label className="left-align block text-sm text-gray-600 mb-1">Helper Text (Optional)</label>
+      <div className='mt-2'>
+        <label className='left-align block text-sm text-gray-600 mb-1'>Helper Text (Optional)</label>
         <input
-          type="text"
+          type='text'
           value={question.helperText || ''}
-          onChange={(e) => onUpdate(question.id, { helperText: e.target.value })}
-          placeholder="Add helper text for this question"
-          className="w-full p-2 border rounded text-sm"
+          onChange={handleHelperTextUpdate}
+          placeholder='Add helper text for this question'
+          className='w-full p-2 border rounded text-sm'
         />
       </div>
 
-      {renderValidationFields()}
+      {renderValidationFields}
 
       {(question.type === 'multiple-choice' || question.type === 'single-select') && (
-        <div className="mt-4 space-y-2">
+        <div className='mt-4 space-y-2'>
           {question.options?.map((option) => (
-            <div key={option.id} className="flex gap-2">
+            <div key={option.id} className='flex gap-2'>
               <input
-                type="text"
+                type='text'
                 value={option.value}
                 onChange={(e) => onUpdateOption(question.id, option.id, e.target.value)}
-                placeholder="Option text"
-                className="flex-1 p-2 border rounded"
+                placeholder='Option text'
+                className='flex-1 p-2 border rounded'
               />
               <button
                 onClick={() => onDeleteOption(question.id, option.id)}
-                className="text-red-500 hover:text-red-700"
+                className='text-red-500 hover:text-red-700'
               >
                 Remove
               </button>
             </div>
           ))}
-          <button
-            onClick={() => onAddOption(question.id)}
-            className="text-blue-500 hover:text-blue-700"
-          >
+          <button onClick={() => onAddOption(question.id)} className='text-blue-500 hover:text-blue-700'>
             + Add Option
           </button>
         </div>

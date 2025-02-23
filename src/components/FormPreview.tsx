@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormAnswers, FormConfig, Question } from '../types/form';
-import { validators } from '../utils/validations';
+import { validatorsForFormSubmission } from '../utils/validations';
 import './styles/styles.css';
 
 export const FormPreview: React.FC = () => {
@@ -31,7 +31,7 @@ export const FormPreview: React.FC = () => {
       e.preventDefault();
       let updatedFormData = { ...formConfig, answers };
       const updatedErrors = formConfig.questions.reduce((acc, question) => {
-        const validate = validators[question.type];
+        const validate = validatorsForFormSubmission[question.type];
         if (validate) {
           const error = validate(answers[question.id], question);
           acc[question.id] = error || null;
