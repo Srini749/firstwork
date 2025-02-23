@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Question as QuestionType } from '../types/form';
 import './styles/styles.css';
 import TextField from './TextField';
