@@ -1,60 +1,60 @@
-import { Question } from "../types/form";
+import { Question, QuestionType } from "../types/form";
 
-export const validators = {
-  'short-text': (value: string, question: Question) => {
-    if (question.required && !value) return 'This field is required';
-    if (question.validation?.minLength && value.length < question.validation.minLength) {
-      return `Minimum ${question.validation.minLength} characters required`;
-    }
-    if (question.validation?.maxLength && value.length > question.validation.maxLength) {
-      return `Maximum ${question.validation.maxLength} characters allowed`;
-    }
-    return null;
-  },
+type ValidatorFunction = (value: any, question: Question) => string | null;
 
-  'email': (value: string, question: Question) => {
-    if (question.required && !value) return 'This field is required';
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (value && !emailRegex.test(value)) return 'Please enter a valid email address';
-    return null;
-  },
+const requiredValidator = (value: any, message: string) => (!value ? message : null);
 
-  'phone': (value: string, question: Question) => {
-    if (question.required && !value) return 'This field is required';
-    const phoneRegex = /^\+?[\d\s-]{10,}$/;
-    if (value && !phoneRegex.test(value)) return 'Please enter a valid phone number';
-    return null;
-  },
+const lengthValidator = (value: string, question: Question) => {
+  if (question.validation?.minLength && value.length < question.validation.minLength) {
+    return `Minimum ${question.validation.minLength} characters required`;
+  }
+  if (question.validation?.maxLength && value.length > question.validation.maxLength) {
+    return `Maximum ${question.validation.maxLength} characters allowed`;
+  }
+  return null;
+};
 
-  'number': (value: string, question: Question) => {
-    if (question.required && !value) return 'This field is required';
-    const num = Number(value);
-    if (isNaN(num)) return 'Please enter a valid number';
-    if (question.validation?.min !== undefined && num < question.validation.min) {
-      return `Minimum value is ${question.validation.min}`;
-    }
-    if (question.validation?.max !== undefined && num > question.validation.max) {
-      return `Maximum value is ${question.validation.max}`;
-    }
-    return null;
-  },
+const regexValidator = (value: string, regex: RegExp, message: string) =>
+  value && !regex.test(value) ? message : null;
 
-  'multiple-choice': (value: string[], question: Question) => {
-    if (question.required && (!value || value.length === 0)) {
-      return 'Please select at least one option';
-    }
-    return null;
-  },
+const rangeValidator = (value: number, question: Question) => {
+  if (isNaN(value)) return 'Please enter a valid number';
+  if (question.validation?.min !== undefined && value < question.validation.min) {
+    return `Minimum value is ${question.validation.min}`;
+  }
+  if (question.validation?.max !== undefined && value > question.validation.max) {
+    return `Maximum value is ${question.validation.max}`;
+  }
+  return null;
+};
 
-  'single-select': (value: string, question: Question) => {
-    if (question.required && !value) return 'Please select an option';
-    return null;
-  },
+export const validators: Record<QuestionType, ValidatorFunction> = {
+  'short-text': (value, question) =>
+    requiredValidator(value, 'This field is required') || lengthValidator(value, question),
 
-  'date': (value: string, question: Question) => {
-    if (question.required && !value) return 'This field is required';
+  'long-text': (value, question) =>
+    requiredValidator(value, 'This field is required') || lengthValidator(value, question),
+
+  email: (value, question) =>
+    requiredValidator(value, 'This field is required') ||
+    regexValidator(value, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'),
+
+  phone: (value, question) =>
+    requiredValidator(value, 'This field is required') ||
+    regexValidator(value, /^\+?[\d\s-]{10,}$/, 'Please enter a valid phone number'),
+
+  number: (value, question) =>
+    requiredValidator(value, 'This field is required') || rangeValidator(Number(value), question),
+
+  'multiple-choice': (value, question) =>
+    requiredValidator(value?.length ? value : null, 'Please select at least one option'),
+
+  'single-select': (value, question) =>
+    requiredValidator(value, 'Please select an option'),
+
+  date: (value, question) => {
+    if (requiredValidator(value, 'This field is required')) return 'This field is required';
     const date = new Date(value);
-    if (isNaN(date.getTime())) return 'Please enter a valid date';
-    return null;
+    return isNaN(date.getTime()) ? 'Please enter a valid date' : null;
   }
 };

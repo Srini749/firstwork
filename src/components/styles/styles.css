@@ -94,3 +94,18 @@
   text-align: left;
 }
 
+.preview-submit-button {
+  position: sticky;
+  bottom: 20px;
+}
+
+.error {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  text-align: left;
+  margin-top: 4px;
+}

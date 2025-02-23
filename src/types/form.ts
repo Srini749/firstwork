@@ -21,6 +21,7 @@ export interface Question {
     minDate?: string | undefined,
     maxDate?: string | undefined,
   };
+  answer?: string| string[] | undefined,
 }
 
 export interface FormConfig {
@@ -30,4 +31,7 @@ export interface FormConfig {
   questions: Question[];
   createdAt: string;
   updatedAt: string;
+}
+export interface FormAnswers {
+  [key: string]: string | string[];
 }
