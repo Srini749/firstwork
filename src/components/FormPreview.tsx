@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FormConfig, Question } from '../types/form';
 import { useParams } from 'react-router-dom';
 
-// Define the shape of our answers object
 interface FormAnswers {
   [key: string]: string | string[];
 }
@@ -11,7 +10,7 @@ export const FormPreview: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
   const [answers, setAnswers] = useState<FormAnswers>({});
   const [formConfig, setFormConfig] = useState(() => {
-    const saved = localStorage.getItem(`form_${formId || 'draft'}`);
+    const saved = localStorage.getItem(`${formId}`);
     if (saved) {
       return JSON.parse(saved);
     }

@@ -17,6 +17,7 @@ export const FormBuilder: React.FC = () => {
     saveForm,
     previewForm,
     lastSaved,
+    updateFormTitle,
   } = useFormBuilder(formId);
 
   return (
@@ -25,7 +26,7 @@ export const FormBuilder: React.FC = () => {
         <input
           type='text'
           value={formConfig.title}
-          onChange={(e) => updateQuestion('title', { title: e.target.value })}
+          onChange={(e) => updateFormTitle(e.target.value)}
           className='text-2xl font-bold border-none focus:outline-none'
         />
         <div>

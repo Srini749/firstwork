@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 export const useFormBuilder = (formId?: string) => {
   const navigate = useNavigate();
   const [formConfig, setFormConfig] = useState<FormConfig>(() => {
-    const saved = localStorage.getItem(`form_${formId || 'draft'}`);
+    const saved = localStorage.getItem(`${formId || 'draft'}`);
     if (saved) {
       return JSON.parse(saved);
     }
@@ -42,6 +42,13 @@ export const useFormBuilder = (formId?: string) => {
     setFormConfig((prev) => ({
       ...prev,
       questions: prev.questions.map((q) => (q.id === id ? { ...q, ...updates } : q)),
+    }));
+  }, []);
+
+  const updateFormTitle = useCallback((title: string) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      title,
     }));
   }, []);
 
@@ -109,7 +116,7 @@ export const useFormBuilder = (formId?: string) => {
         ...formConfig,
         updatedAt: new Date().toISOString(),
       };
-      localStorage.setItem(`form_${formConfig.id}`, JSON.stringify(updatedConfig));
+      localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
       setLastSaved(new Date());
     },
     [formConfig],
@@ -126,5 +133,6 @@ export const useFormBuilder = (formId?: string) => {
     saveForm,
     lastSaved,
     previewForm,
+    updateFormTitle,
   };
 };

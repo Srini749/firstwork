@@ -11,11 +11,15 @@ export interface Question {
   type: QuestionType;
   required: boolean;
   options?: Option[];
+  helperText?: string;
   validation?: {
     minLength?: number;
+    [key: string]: number | string | undefined;
     maxLength?: number;
     min?: number;
     max?: number;
+    minDate?: string | undefined,
+    maxDate?: string | undefined,
   };
 }
 

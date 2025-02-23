@@ -89,3 +89,8 @@
 .text-sm {
   margin-bottom: 2px;
 }
+
+.left-align {
+  text-align: left;
+}
+
