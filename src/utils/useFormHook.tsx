@@ -19,10 +19,20 @@ export const useFormBuilder = (formId?: string) => {
   });
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [saving, setSaving] = useState<boolean>(false);
 
   // Auto-save effect
   useEffect(() => {
-    saveForm();
+    const animationTimer = setTimeout(() => {
+      setSaving(true);
+    }, 7000);
+    const formDataTimer = setTimeout(() => {
+      saveForm();
+    }, 10000);
+    return () => {
+      clearTimeout(formDataTimer);
+      clearTimeout(animationTimer);
+    };
   }, [formConfig]);
 
   const addQuestion = useCallback(() => {
@@ -111,7 +121,6 @@ export const useFormBuilder = (formId?: string) => {
     window.open(urlWithoutEdit, '_blank');
   };
 
-  // Throttled Save Function
   const saveForm = useCallback(() => {
     const updatedConfig = {
       ...formConfig,
@@ -119,6 +128,7 @@ export const useFormBuilder = (formId?: string) => {
     };
     localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
     setLastSaved(new Date());
+    setSaving(false);
   }, [formConfig]);
 
   return {
@@ -133,5 +143,6 @@ export const useFormBuilder = (formId?: string) => {
     lastSaved,
     previewForm,
     updateFormTitle,
+    saving,
   };
 };

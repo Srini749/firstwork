@@ -18,6 +18,7 @@ export const FormBuilder: React.FC = () => {
     previewForm,
     lastSaved,
     updateFormTitle,
+    saving,
   } = useFormBuilder(formId);
 
   return (
@@ -30,9 +31,13 @@ export const FormBuilder: React.FC = () => {
           className='text-2xl font-bold border-none focus:outline-none'
         />
         <div>
-          <p className='text-sm text-gray-500'>
-            {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved yet'}
-          </p>
+          <div className="element-row">
+            {saving && <div className='loader'></div>}
+            <p className='text-sm text-gray-500'>
+              {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved yet'}
+            </p>
+          </div>
+
           <button onClick={saveForm} className='save-form bg-blue-500 text-white px-4 py-2 rounded'>
             Save Form
           </button>
