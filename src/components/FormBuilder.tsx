@@ -1,7 +1,9 @@
 import React from 'react';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useFormBuilder } from '../utils/useFormHook';
-import { Question } from './Question';
 import { useParams } from 'react-router-dom';
+import { FormHeader } from './FormHeader';
+import { QuestionList } from './QuestionList';
 import './styles/styles.css';
 
 export const FormBuilder: React.FC = () => {
@@ -20,54 +22,46 @@ export const FormBuilder: React.FC = () => {
     updateFormTitle,
     saving,
     errors,
+    reorderQuestions,
   } = useFormBuilder(formId);
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    if (sourceIndex === destinationIndex) return;
+    reorderQuestions(sourceIndex, destinationIndex);
+  };
+
   return (
-    <div className='max-w-4xl mx-auto p-6'>
-      <div className='flex justify-between items-center mb-6'>
-        <input
-          type='text'
-          value={formConfig.title}
-          onChange={(e) => updateFormTitle(e.target.value)}
-          className='text-2xl font-bold border-none focus:outline-none'
+    <div className="max-w-4xl mx-auto p-6">
+      <FormHeader
+        title={formConfig.title}
+        onTitleChange={updateFormTitle}
+        onSave={saveForm}
+        onPreview={previewForm}
+        lastSaved={lastSaved}
+        saving={saving}
+        canPreview={!!lastSaved && formConfig.questions.length > 0}
+      />
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <QuestionList
+          questions={formConfig.questions}
+          onUpdate={updateQuestion}
+          onDelete={deleteQuestion}
+          onAddOption={addOption}
+          onUpdateOption={updateOption}
+          onDeleteOption={deleteOption}
+          errors={errors}
         />
-        <div>
-          <div className="element-row">
-            {saving && <div className='loader'></div>}
-            <p className='text-sm text-gray-500'>
-              {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved yet'}
-            </p>
-          </div>
-
-          <button onClick={saveForm} className='save-form bg-blue-500 text-white px-4 py-2 rounded'>
-            Save Form
-          </button>
-          {lastSaved && formConfig.questions.length > 0 && (
-            <button onClick={previewForm} className='bg-blue-500 text-white px-4 py-2 rounded'>
-              Preview
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className='space-y-4'>
-        {formConfig.questions.map((question) => (
-          <Question
-            key={question.id}
-            question={question}
-            onUpdate={updateQuestion}
-            onDelete={deleteQuestion}
-            onAddOption={addOption}
-            onUpdateOption={updateOption}
-            onDeleteOption={deleteOption}
-            error={errors[question.id]}
-          />
-        ))}
-      </div>
+      </DragDropContext>
 
       <button
         onClick={addQuestion}
-        className='mt-4 w-full py-2 border-2 border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-gray-50'
+        className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 text-gray-500 rounded-lg hover:bg-gray-50 transition-colors"
       >
         + Add Question
       </button>

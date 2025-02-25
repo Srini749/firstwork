@@ -9,7 +9,7 @@ interface QuestionProps {
   onAddOption: (questionId: string) => void;
   onUpdateOption: (questionId: string, optionId: string, value: string) => void;
   onDeleteOption: (questionId: string, optionId: string) => void;
-  error: string | null,
+  error: string | null | undefined,
 }
 
 const questionTypes = [

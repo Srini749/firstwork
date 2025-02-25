@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { validatorsForFormCreation } from './validations';
 
 export const useFormBuilder = (formId?: string) => {
-  const navigate = useNavigate();
-  const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string | null | undefined }>({});
   const [formConfig, setFormConfig] = useState<FormConfig>(() => {
     const saved = localStorage.getItem(`${formId || 'draft'}`);
     if (saved) {
@@ -138,7 +137,7 @@ export const useFormBuilder = (formId?: string) => {
         acc[question.id] = error || null;
       }
       return acc;
-    }, {} as { [key: string]: string | null });
+    }, {} as { [key: string]: string | null | undefined });
     setSaving(false);
     const hasError = Object.values(updatedErrors).some(value => value !== null && value !== undefined);
     if (hasError) {
@@ -148,6 +147,19 @@ export const useFormBuilder = (formId?: string) => {
     setLastSaved(new Date());
     localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
   }, [formConfig]);
+
+  const reorderQuestions = (sourceIndex: number, destinationIndex: number) => {
+    setFormConfig((prev) => {
+      const newQuestions = Array.from(prev.questions);
+      const [removed] = newQuestions.splice(sourceIndex, 1);
+      newQuestions.splice(destinationIndex, 0, removed);
+  
+      return {
+        ...prev,
+        questions: newQuestions,
+      };
+    });
+  };
 
   return {
     formConfig,
@@ -163,5 +175,6 @@ export const useFormBuilder = (formId?: string) => {
     updateFormTitle,
     saving,
     errors,
+    reorderQuestions,
   };
 };
