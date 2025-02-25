@@ -19,19 +19,19 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
   saving,
   canPreview,
 }) => (
-  <div className="flex justify-between items-center mb-6">
+  <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
     <input
       type="text"
       value={title}
       onChange={(e) => onTitleChange(e.target.value)}
-      className="text-2xl font-bold border-none focus:outline-none"
+      className="text-2xl font-bold border-none focus:outline-none w-full sm:w-auto sm:flex-1"
       placeholder="Enter form title..."
     />
-    <div className="flex items-center gap-4">
+    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mt-4 sm:mt-0">
       <div className="flex items-center gap-2">
         {saving && <div className="loader"></div>}
         <p className="text-sm text-gray-500">
-          {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved yet'}
+          {lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : ''}
         </p>
       </div>
       <div className="flex gap-2">
