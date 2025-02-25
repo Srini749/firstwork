@@ -144,6 +144,7 @@ export const useFormBuilder = (formId?: string) => {
       setErrors(updatedErrors);
       return;
     }
+    setErrors({});
     setLastSaved(new Date());
     localStorage.setItem(formConfig.id, JSON.stringify(updatedConfig));
   }, [formConfig]);
